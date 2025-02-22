@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Інформативний Бриф Проєкту</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            background: #fff;
+            padding: 20px;
+            margin: 0 auto;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            width: 40%;
+            font-weight: bold;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 60%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        hr {
+            border: none;
+            height: 1px;
+            background-color: #ddd;
+            margin: 20px 0;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Бриф</h1>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <h2>1. Спосіб звʼязку</h2>
+            <div class="form-group">
+                <label for="name">Ім'я</label>
+                {{ form.name(size=50) }}
+            </div>
+            <div class="form-group">
+                <label for="phone">Контактний телефон</label>
+                {{ form.phone(size=50) }}
+            </div>
+            <div class="form-group">
+                <label for="contact_time">Зручний час для звʼязку</label>
+                <input type="time" id="contact_time" name="contact_time" min="08:00" max="18:00" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Електронна пошта</label>
+                {{ form.email(size=50) }}
+            </div>
+
+            <hr>
+
+            <h2>2. Загальні відомості</h2>
+            <div class="form-group">
+                <label for="product_name">Назва продукту або компанії</label>
+                {{ form.product_name(size=100) }}
+            </div>
+            <div class="form-group">
+                <label for="project_description">Опис проєкту</label>
+                {{ form.project_description(rows=4, cols=50) }}
+            </div>
+
+            <hr>
+
+            <h2>3. Цільова аудиторія</h2>
+            <div class="form-group">
+                <label for="target_audience">Хто ваші клієнти?</label>
+                {{ form.target_audience(rows=4, cols=50) }}
+            </div>
+
+            <hr>
+
+            <h2>4. Основні цілі</h2>
+            <div class="form-group">
+                <label for="product_goal">Основна мета</label>
+                {{ form.product_goal() }}
+            </div>
+            <div class="form-group">
+                <label for="existing_website">Чи є сайт?</label>
+                {{ form.existing_website() }}
+            </div>
+            <div class="form-group">
+                <label for="required_features">Необхідні функції</label>
+                {{ form.required_features(rows=4, cols=50) }}
+            </div>
+
+            <hr>
+
+            <h2>5. Конкуренти</h2>
+            <div class="form-group">
+                <label for="competitors">Конкуренти</label>
+                {{ form.competitors(rows=4, cols=50) }}
+            </div>
+
+            <hr>
+
+            <h2>6. Додаткові питання</h2>
+            <div class="form-group">
+                <label for="budget">Бюджет</label>
+                {{ form.budget(size=50) }}
+            </div>
+            <div class="form-group">
+                <label for="promotion_channels">Канали просування</label>
+                {{ form.promotion_channels() }}
+            </div>
+            <div class="form-group">
+                <label for="content_manager">Контент-менеджер</label>
+                {{ form.content_manager(size=50) }}
+            </div>
+            <div class="form-group">
+                <label for="additional_comments">Додаткові коментарі</label>
+                {{ form.additional_comments(rows=4, cols=50) }}
+            </div>
+            <div class="form-group">
+                <label for="favorite_examples">Приклади сайтів, які вам подобаються</label>
+                {{ form.favorite_examples(rows=2, cols=50) }}
+            </div>
+
+            <hr>
+
+            <button type="submit">Надіслати</button>
+        </form>
+    </div>
+</body>
+</html>

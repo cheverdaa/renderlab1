@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Надіслані Бріфи</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            {#max-width: 1200px;#}
+            background: #fff;
+            padding: 20px;
+            margin: 0 auto;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #28a745;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        .edit-button, .delete-button {
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .edit-button {
+            background-color: #ffc107;
+            color: black;
+        }
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+        }
+        .edit-button:hover {
+            background-color: #e0a800;
+        }
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+        .back-button {
+            display: block;
+            width: 150px;
+            text-align: center;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            width: 50%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        .close {
+            font-size: 28px;
+            cursor: pointer;
+        }
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            width: 40%;
+            font-weight: bold;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 60%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let editModal = document.getElementById("editModal");
+        if (editModal) {
+            editModal.style.display = "none";
+        }
+
+        // Обробник подій для форми редагування
+        let form = document.getElementById('editBriefForm');
+        if (form) {
+            form.onsubmit = function (event) {
+                event.preventDefault();
+                sendEditForm();
+            };
+        }
+
+        // Додаємо обробники подій для кнопок редагування
+        document.querySelectorAll(".edit-button").forEach(button => {
+            button.addEventListener("click", function () {
+                let briefId = this.getAttribute("data-id");
+                if (!briefId) {
+                    console.error("Помилка: briefId відсутній");
+                    return;
+                }
+                openEditModal(briefId);
+            });
+        });
+
+        // Закриття модального вікна
+        let closeModalBtn = document.getElementById("closeEditModal");
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener("click", closeEditModal);
+        }
+    });
+
+    // Функція відкриття модального вікна
+    function openEditModal(briefId) {
+        fetch(`/get-brief/${briefId}`)
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    console.error("Помилка:", data.error);
+                    return;
+                }
+
+                // Перевіряємо, що кожен елемент існує перед доступом до нього
+                let fields = {
+                    'editBriefId': data.id,
+                    'editName': data.name || "",
+                    'editPhone': data.phone || "",
+                    'editContactTime': data.contact_time || "",
+                    'editEmail': data.email || "",
+                    'editProductName': data.product_name || "",
+                    'editProjectDescription': data.project_description || "",
+                    'editTargetAudience': data.target_audience || "",
+                    'editProductGoal': data.product_goal || "",
+                    'editCompetitors': data.competitors || "",
+                    'editBudget': data.budget || "",
+                    'editPromotionChannels': data.promotion_channels || "",
+                    'editContentManager': data.content_manager || "",
+                    'editAdditionalComments': data.additional_comments || "",
+                    'editFavoriteExamples': data.favorite_examples || ""
+                };
+
+                for (let id in fields) {
+                    let input = document.getElementById(id);
+                    if (input) input.value = fields[id];
+                }
+
+                let saveButton = document.getElementById("saveChanges");
+                if (saveButton) saveButton.setAttribute("data-id", briefId);
+
+                document.getElementById("editModal").style.display = "block";
+            })
+            .catch(error => console.error("Error fetching brief data:", error));
+    }
+
+    // Функція закриття модального вікна
+    function closeEditModal() {
+        let editModal = document.getElementById("editModal");
+        if (editModal) editModal.style.display = "none";
+    }
+
+    // Функція відправки форми редагування
+    function sendEditForm() {
+    let id = document.getElementById('editBriefId').value;
+    let formElement = document.getElementById('editBriefForm');
+
+    // Створюємо FormData
+    let formData = new FormData(formElement);
+
+    // Дебагінг: виводимо у консоль, які дані передаються
+    let debugData = {};
+    formData.forEach((value, key) => { debugData[key] = value; });
+    console.log("Відправляємо дані:", debugData);
+
+    fetch(`/edit/${id}`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Запис оновлено!');
+            closeEditModal();
+            location.reload();
+        } else {
+            alert('Помилка: ' + (data.error || 'Невідома помилка'));
+        }
+    })
+    .catch(error => {
+        console.error('Помилка:', error);
+        alert('Сталася помилка при відправці даних.');
+    });
+}
+
+    // Функція для оновлення рядка в таблиці без перезавантаження сторінки
+    function updateTableRow(id, updatedData) {
+        let row = document.querySelector(`tr[data-id='${id}']`);
+        if (row) {
+            let fields = {
+                ".brief-name": updatedData.name,
+                ".brief-phone": updatedData.phone,
+                ".brief-contact-time": updatedData.contact_time,
+                ".brief-email": updatedData.email,
+                ".brief-product-name": updatedData.product_name,
+                ".brief-project-description": updatedData.project_description,
+                ".brief-target-audience": updatedData.target_audience,
+                ".brief-product-goal": updatedData.product_goal,
+                ".brief-competitors": updatedData.competitors,
+                ".brief-budget": updatedData.budget,
+                ".brief-promotion-channels": updatedData.promotion_channels,
+                ".brief-content-manager": updatedData.content_manager,
+                ".brief-additional-comments": updatedData.additional_comments,
+                ".brief-favorite-examples": updatedData.favorite_examples
+            };
+
+            for (let selector in fields) {
+                let element = row.querySelector(selector);
+                if (element) element.textContent = fields[selector];
+            }
+        }
+    }
+</script>
+
+
+</head>
+<body>
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+             <div class="modal-header">
+                <h2>Редагувати Бриф</h2>
+                <span class="close" onclick="closeEditModal()">&times;</span>
+             </div>
+            <form id="editBriefForm" method="POST">
+                {{ form.hidden_tag() }}
+                <input type="hidden" id="editBriefId">
+                <div class="form-group">
+                    <label for="editName">Ім'я:</label>
+                    <input type="text" name="name" id="editName" required><br>
+                </div>
+
+                <div class="form-group">
+                    <label for="editPhone">Телефон:</label>
+                    <input type="text" name="phone" id="editPhone" required><br>
+                </div>
+
+                <div class="form-group">
+                    <label for="editContactTime">Час Зв'язку:</label>
+                    <input type="time" name="contact_time" id="editContactTime" required><br>
+                </div>
+
+                <div class="form-group">
+                    <label for="editEmail">Email:</label>
+                    <input type="email" name="email" id="editEmail" required><br>
+                </div>
+
+                <div class="form-group">
+                    <label for="editProductName">Продукт:</label>
+                    <input type="text" name="product_name" id="editProductName" required><br>
+                </div>
+
+                <div class="form-group">
+                    <label for="editProjectDescription">Опис Проєкту:</label>
+                    <textarea name="project_description" id="editProjectDescription"></textarea><br>
+                </div>
+
+                <div class="form-group">
+                    <label for="editTargetAudience">Цільова Аудиторія:</label>
+                    <textarea name="target_audience" id="editTargetAudience"></textarea><br>
+                </div>
+
+                <div class="form-group">
+                    <label for="editProductGoal">Мета:</label>
+                    <select name="product_goal" id="editProductGoal">
+                        <option value="Продаж">Продаж</option>
+                        <option value="Службовий сайт">Службовий сайт</option>
+                        <option value="Інформування">Інформування</option>
+                        <option value="Реклама">Реклама</option>
+                    </select><br>
+                </div>
+
+                <div class="form-group">
+                    <label for="editCompetitors">Конкуренти:</label>
+                    <textarea name="competitors" id="editCompetitors"></textarea><br>
+                </div>
+
+                <div class="form-group">
+                    <label for="editBudget">Бюджет:</label>
+                    <input name="budget" type="text" id="editBudget"><br>
+                </div>
+
+                <div class="form-group">
+                    <label for="editPromotionChannels">Канали Просування:</label>
+                    <textarea name="promotion_channels" id="editPromotionChannels"></textarea><br>
+                </div>
+
+                <div class="form-group">
+                    <label for="editContentManager">Контент-Менеджер:</label>
+                    <input type="text" name="content_manager" id="editContentManager"><br>
+                </div>
+
+                <div class="form-group">
+                    <label for="editAdditionalComments">Коментарі:</label>
+                    <textarea name="additional_comments" id="editAdditionalComments"></textarea><br>
+                </div>
+
+                <div class="form-group">
+                    <label for="editFavoriteExamples">Приклади:</label>
+                    <textarea name="favourite_examples" id="editFavoriteExamples"></textarea><br>
+                </div>
+
+                <button type="submit">Зберегти</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Адмін Панель</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Ім'я</th>
+                    <th>Телефон</th>
+                    <th>Час Зв'язку</th>
+                    <th>Email</th>
+                    <th>Продукт</th>
+                    <th>Опис Проєкту</th>
+                    <th>Цільова Аудиторія</th>
+                    <th>Мета</th>
+                    <th>Конкуренти</th>
+                    <th>Бюджет</th>
+                    <th>Канали Просування</th>
+                    <th>Контент-Менеджер</th>
+                    <th>Коментарі</th>
+                    <th>Приклади</th>
+                    <th>Дії</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for brief in briefs %}
+                <tr>
+                    <td>{{ brief.id }}</td>
+                    <td class="name">{{ brief.name }}</td>
+                    <td class="phone">{{ brief.phone }}</td>
+                    <td class="contact_time">{{ brief.contact_time }}</td>
+                    <td class="email">{{ brief.email }}</td>
+                    <td class="product_name">{{ brief.product_name }}</td>
+                    <td class="project_description">{{ brief.project_description }}</td>
+                    <td class="target_audience">{{ brief.target_audience }}</td>
+                    <td class="product_goal">{{ brief.product_goal }}</td>
+                    <td class="competitors">{{ brief.competitors }}</td>
+                    <td class="budget">{{ brief.budget }}</td>
+                    <td class="promotion_channels">{{ brief.promotion_channels }}</td>
+                    <td class="content_manager">{{ brief.content_manager }}</td>
+                    <td class="additional_comments">{{ brief.additional_comments }}</td>
+                    <td class="favorite_examples">{{ brief.favorite_examples }}</td>
+                    <td class="action-buttons">
+{#                        <a href="javascript:void(0);" class="edit-button" onclick="openEditModal({#}
+{#                            id: '{{ brief.id }}',#}
+{#                            name: '{{ brief.name }}',#}
+{#                            phone: '{{ brief.phone }}',#}
+{#                            contact_time: '{{ brief.contact_time }}',#}
+{#                            email: '{{ brief.email }}',#}
+{#                            product_name: '{{ brief.product_name }}',#}
+{#                            project_description: '{{ brief.project_description }}',#}
+{#                            target_audience: '{{ brief.target_audience }}',#}
+{#                            product_goal: '{{ brief.product_goal }}',#}
+{#                            competitors: '{{ brief.competitors }}',#}
+{#                            budget: '{{ brief.budget }}',#}
+{#                            promotion_channels: '{{ brief.promotion_channels }}',#}
+{#                            content_manager: '{{ brief.content_manager }}',#}
+{#                            additional_comments: '{{ brief.additional_comments }}',#}
+{#                            favorite_examples: '{{ brief.favorite_examples }}'#}
+{#                        });">Редагувати</a>#}
+                        <button class="edit-button" data-id="{{ brief.id }}">Редагувати</button>
+
+                        <a href="{{ url_for('delete_brief', brief_id=brief.id) }}" class="delete-button" onclick="return confirm('Ви впевнені, що хочете видалити цей запис?');">Видалити</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="/" class="back-button">На головну</a>
+    </div>
+</body>
+</html>
